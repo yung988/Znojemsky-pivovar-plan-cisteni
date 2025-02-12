@@ -29,6 +29,7 @@ export const CleaningSchedule = () => {
   const [taps, setTaps] = useState<Tap[]>([])
   const [editingTap, setEditingTap] = useState<number | null>(null)
   const [newTapName, setNewTapName] = useState("")
+  const [isAddingTap, setIsAddingTap] = useState(false)
 
   const cleaningTypes = ["Běžné", "Hloubkové", "Sanitace"]
 
@@ -137,18 +138,26 @@ export const CleaningSchedule = () => {
   }
 
   const addNewTap = async () => {
-    const { data, error } = await supabase
-      .from("taps")
-      .insert([{ name: `Výčep ${taps.length + 1}` }])
-      .select()
+    try {
+      setIsAddingTap(true)
+      const { data, error } = await supabase
+        .from("taps")
+        .insert([{ name: `Výčep ${taps.length + 1}` }])
+        .select()
+        .single()
 
-    if (error) {
-      console.error("Chyba při přidávání výčepu:", error)
-      return
-    }
+      if (error) {
+        console.error("Chyba při přidávání výčepu:", error)
+        return
+      }
 
-    if (data) {
-      setTaps((prev) => [...prev, data[0]])
+      if (data) {
+        setTaps((prev) => [...prev, data])
+      }
+    } catch (error) {
+      console.error("Neočekávaná chyba při přidávání výčepu:", error)
+    } finally {
+      setIsAddingTap(false)
     }
   }
 
@@ -328,8 +337,8 @@ export const CleaningSchedule = () => {
             </React.Fragment>
           ))}
         </div>
-        <Button onClick={addNewTap} className="mt-4">
-          <Plus className="mr-2 h-4 w-4" /> Přidat nový výčep
+        <Button onClick={addNewTap} className="mt-4" disabled={isAddingTap}>
+          <Plus className="mr-2 h-4 w-4" /> {isAddingTap ? "Přidávám..." : "Přidat nový výčep"}
         </Button>
       </CardContent>
     </Card>
