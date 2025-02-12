@@ -83,11 +83,13 @@ export const CleaningSchedule = () => {
   const weekDays = getWeekDays(selectedDate)
 
   const addCleaningRecord = async (date: Date, tapId: number) => {
-    const { data, error } = await supabase.from("cleaning_records").insert([
+    const now = new Date()
+    const time = now.toLocaleTimeString('cs-CZ', { hour12: false }).split(' ')[0]
+    const { error } = await supabase.from("cleaning_records").insert([
       {
         tap_id: tapId,
         date: date.toISOString().split("T")[0],
-        time: new Date().toLocaleTimeString(),
+        time: time,
         employee: "Jan Novák",
         type: "Běžné",
       },
